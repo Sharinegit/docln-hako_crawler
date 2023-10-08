@@ -19,9 +19,12 @@ const UserAgent = "Mozilla/5.0 (Windows NT 10.0; rv:108.0) Gecko/20100101 Firefo
 
 var (
 	retriesFlag = flag.Int("retries", 10, "retries count")
-	timeoutFlag = flag.Duration("timeout", time.Second*10, "http timeout")
+	timeoutFlag = flag.Duration("timeout", time.Second*0, "http timeout")
 	noteFlag    = flag.Bool("note", true, "enable note")
 	linkFlag    = flag.String("link", "", "link to archive")
+	volfFlag    = flag.Int("volf", -1, "crawl from")
+	voleFlag    = flag.Int("vole", -1, "crawl to")
+	infoFlag    = flag.String("info", "", "get novel's info")
 )
 
 //go:embed epub.css
@@ -117,18 +120,35 @@ func main() {
 	if len(series.Volumes) == 0 {
 		panic("Sai định dạng link hoặc truyện không tồn tại?")
 	}
-
+	
+	if *volfFlag < 1 {
+		*volfFlag = 1;
+	}
+	if *voleFlag < 1 {
+		*voleFlag = len(series.Volumes);
+	}
+	if *volfFlag > len(series.Volumes) {
+		*volfFlag = len(series.Volumes);
+	}
+	if *voleFlag > len(series.Volumes) {
+		*voleFlag = len(series.Volumes);
+	}
+	*volfFlag--;
+	*voleFlag--;
+	if *infoFlag != "" {
 	fmt.Printf("Tên: %s (%s) - %s\n", series.Title, series.Id, series.Status)
 	fmt.Printf("Tác giả: %s - Minh hoạ: %s\n", series.Author, series.Artist)
 	fmt.Printf("Dịch giả: %s - Nhóm dịch: %s\n", series.Translator, series.Group)
 	fmt.Printf("Số volume: %d tập\n", len(series.Volumes))
+	}
 
 	outputPath := filepath.Join(series.Title)
 
 	_ = os.Mkdir(outputPath, 0700)
 	_ = os.Mkdir(filepath.Join("./tmp", series.Id), 0700)
-
-	for i, vol := range series.Volumes {
+	if *infoFlag == "" {
+	for i := *volfFlag; i < *voleFlag + 1; i++{
+		vol := series.Volumes[i]
 		fmt.Println("-----------------------------------")
 		fmt.Printf("Đang crawl volume %d: %s\n", i+1, vol.Title)
 		book := Book{
@@ -186,4 +206,5 @@ func main() {
 			log.Fatalln(err)
 		}
 	}
+}
 }
