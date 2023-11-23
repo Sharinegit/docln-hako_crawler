@@ -25,6 +25,7 @@ var (
 	volfFlag    = flag.Int("volf", -1, "crawl from")
 	voleFlag    = flag.Int("vole", -1, "crawl to")
 	infoFlag    = flag.String("info", "", "get novel's info")
+	outFlag     = flag.String("out", "", "Address")
 )
 
 //go:embed epub.css
@@ -142,7 +143,7 @@ func main() {
 	fmt.Printf("Số volume: %d tập\n", len(series.Volumes))
 	}
 
-	outputPath := filepath.Join(series.Title)
+	outputPath := *outFlag + series.Title;
 
 	_ = os.Mkdir(outputPath, 0700)
 	_ = os.Mkdir(filepath.Join("./tmp", series.Id), 0700)
